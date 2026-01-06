@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#0ea5e9" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="styles.css" />
+  <title>Physio Tracker</title>
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <div class="logo">PT</div>
+      <div>
+        <div class="title">Physio Tracker</div>
+        <div class="subtitle" id="subtitle">Your rehab, simplified.</div>
+      </div>
+    </div>
+    <button class="btn ghost" id="btnReset" title="Reset all data">Reset</button>
+  </header>
+
+  <main class="wrap">
+    <nav class="tabs" role="tablist" aria-label="Navigation tabs">
+      <button class="tab active" data-tab="home">Today</button>
+      <button class="tab" data-tab="plan">Plan</button>
+      <button class="tab" data-tab="checkin">Check-in</button>
+      <button class="tab" data-tab="progress">Progress</button>
+      <button class="tab" data-tab="settings">Settings</button>
+    </nav>
+
+    <!-- TODAY -->
+    <section class="panel active" id="tab-home">
+      <div class="card">
+        <div class="cardHead">
+          <h2>Today’s Session</h2>
+          <span class="pill" id="todayStatus">Not started</span>
+        </div>
+        <p class="muted" id="todayDate"></p>
+
+        <div id="todayList" class="list"></div>
+
+        <div class="row gap">
+          <button class="btn primary" id="btnCompleteToday">Mark session done</button>
+          <button class="btn" id="btnSkipToday">I can’t do today</button>
+        </div>
+
+        <div class="notice">
+          <strong>Safety:</strong> If you feel sharp/worsening pain, dizziness, numbness, or sudden swelling, stop and contact a qualified clinician.
+        </div>
+      </div>
+    </section>
+
+    <!-- PLAN -->
+    <section class="panel" id="tab-plan">
+      <div class="card">
+        <div class="cardHead">
+          <h2>Your Rehab Plan</h2>
+          <button class="btn" id="btnAddExercise">+ Add</button>
+        </div>
+        <p class="muted">Tap an exercise to edit details and instructions.</p>
+        <div id="planList" class="list"></div>
+      </div>
+    </section>
+
+    <!-- CHECK-IN -->
+    <section class="panel" id="tab-checkin">
+      <div class="card">
+        <div class="cardHead">
+          <h2>Daily Check-in</h2>
+          <span class="pill" id="checkinPill">Not saved</span>
+        </div>
+
+        <div class="grid2">
+          <label class="field">
+            <span>Pain (0–10)</span>
+            <input type="range" min="0" max="10" value="0" id="painRange" />
+            <div class="rangeRow"><span>0</span><strong id="painVal">0</strong><span>10</span></div>
+          </label>
+
+          <label class="field">
+            <span>Stiffness (0–10)</span>
+            <input type="range" min="0" max="10" value="0" id="stiffRange" />
+            <div class="rangeRow"><span>0</span><strong id="stiffVal">0</strong><span>10</span></div>
+          </label>
+
+          <label class="field">
+            <span>Swelling</span>
+            <select id="swellingSel">
+              <option value="none">None</option>
+              <option value="mild">Mild</option>
+              <option value="moderate">Moderate</option>
+              <option value="severe">Severe</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Sleep (hours)</span>
+            <input type="number" min="0" max="24" step="0.5" id="sleepNum" value="0" />
+          </label>
+        </div>
+
+        <label class="field">
+          <span>Notes</span>
+          <textarea id="notesTxt" rows="4" placeholder="Anything you noticed today..."></textarea>
+        </label>
+
+        <div class="row gap">
+          <button class="btn primary" id="btnSaveCheckin">Save check-in</button>
+          <button class="btn" id="btnClearCheckin">Clear</button>
+        </div>
+
+        <div class="muted small" id="lastCheckinText"></div>
+      </div>
+    </section>
+
+    <!-- PROGRESS -->
+    <section class="panel" id="tab-progress">
+      <div class="card">
+        <div class="cardHead">
+          <h2>Progress</h2>
+          <span class="pill" id="adherencePill">0% adherence</span>
+        </div>
+
+        <div class="stats">
+          <div class="stat">
+            <div class="label">Sessions done (last 14 days)</div>
+            <div class="value" id="done14">0</div>
+          </div>
+          <div class="stat">
+            <div class="label">Streak</div>
+            <div class="value" id="streakVal">0</div>
+          </div>
+          <div class="stat">
+            <div class="label">Last pain</div>
+            <div class="value" id="lastPain">—</div>
+          </div>
+        </div>
+
+        <h3 class="h3">Pain (last 14 days)</h3>
+        <div class="chartWrap">
+          <canvas id="painChart" width="600" height="180"></canvas>
+        </div>
+
+        <h3 class="h3">Check-ins (last 7)</h3>
+        <div id="checkinList" class="list"></div>
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section class="panel" id="tab-settings">
+      <div class="card">
+        <div class="cardHead">
+          <h2>Settings</h2>
+        </div>
+
+        <label class="field">
+          <span>Patient name (optional)</span>
+          <input type="text" id="nameTxt" placeholder="e.g., Karma" />
+        </label>
+
+        <label class="field">
+          <span>Daily reminder (optional)</span>
+          <select id="reminderSel">
+            <option value="off">Off</option>
+            <option value="9">9:00</option>
+            <option value="12">12:00</option>
+            <option value="18">18:00</option>
+            <option value="20">20:00</option>
+          </select>
+          <div class="muted small">Web reminders depend on iPhone browser settings; native notifications are limited on iOS PWAs.</div>
+        </label>
+
+        <div class="notice">
+          This app saves data on <strong>this device</strong>. If you delete browser data, it will be lost.
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- MODAL: edit/add exercise -->
+  <dialog id="exerciseModal">
+    <form method="dialog" class="modal">
+      <div class="modalHead">
+        <h3 id="modalTitle">Exercise</h3>
+        <button class="btn ghost" value="cancel">✕</button>
+      </div>
+
+      <label class="field">
+        <span>Name</span>
+        <input id="exName" required />
+      </label>
+
+      <div class="grid2">
+        <label class="field">
+          <span>Sets</span>
+          <input id="exSets" type="number" min="1" max="20" value="3" required />
+        </label>
+        <label class="field">
+          <span>Reps / sec</span>
+          <input id="exReps" type="number" min="1" max="200" value="10" required />
+        </label>
+      </div>
+
+      <label class="field">
+        <span>Instructions</span>
+        <textarea id="exInst" rows="4" placeholder="Step-by-step, cues, what to avoid..."></textarea>
+      </label>
+
+      <label class="field">
+        <span>Video link (optional)</span>
+        <input id="exVideo" placeholder="https://..." />
+      </label>
+
+      <div class="row gap end">
+        <button class="btn danger" id="btnDeleteExercise" type="button">Delete</button>
+        <button class="btn" value="cancel">Cancel</button>
+        <button class="btn primary" id="btnSaveExercise" type="submit" value="default">Save</button>
+      </div>
+
+      <input type="hidden" id="exId" />
+    </form>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>
